@@ -21,8 +21,10 @@ from skeleton_ik_solver import SkeletonIKSolver
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--blend', type=str, help='Path to rigged model Blender file. eg. c:\\tmp\\model.blend')
-    parser.add_argument('--video', type=str, help='Path to video file. eg. c:\\tmp\\video.mp4')
+    # parser.add_argument('--blend', type=str, help='Path to rigged model Blender file. eg. c:\\tmp\\model.blend')
+    parser.add_argument('--blend', type=str, help='Path to rigged model Blender file. eg. D:\\projs_rm\\mediapipe\\live_mocap\\mixamo.blend')
+    # parser.add_argument('--video', type=str, help='Path to video file. eg. c:\\tmp\\video.mp4')
+    parser.add_argument('--video', type=str, help='Path to video file. eg. C:\\Users\\AYA\\Videos\\bowen-normal.mp4')
     parser.add_argument('--track_hands', action='store_true', help='Enable hand tracking')
 
     args = parser.parse_args()

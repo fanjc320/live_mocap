@@ -244,8 +244,10 @@ def show_annotation(image, kpts3d, valid, intrinsic):
 def test():
     import tqdm
 
-    INPUT_FILE = 'C:\\Users\\16215\\Pictures\\视频项目\\orange.mp4'
-    INPUT_IMAGE_SIZE = (640, 360)
+    # INPUT_FILE = 'C:\\Users\\16215\\Pictures\\视频项目\\orange.mp4'
+    INPUT_FILE = 'C:\\Users\\AYA\\Videos\\bowen-normal.mp4'
+    # INPUT_IMAGE_SIZE = (640, 360)
+    INPUT_IMAGE_SIZE = (540, 960)
     cap = cv2.VideoCapture(INPUT_FILE)
     kpts3ds = []
     
@@ -255,7 +257,8 @@ def test():
         track_hands=False, 
         smooth_range=0.3, 
         smooth_range_barycenter=1.0, 
-        frame_delta=1.0 / 30.0
+        # frame_delta=1.0 / 30.0
+        frame_rate=1.0 / 30.0
     )
 
     frame_t = 0.0
