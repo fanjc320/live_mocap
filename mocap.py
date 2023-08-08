@@ -46,7 +46,7 @@ def main():
     frame_width, frame_height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_rate = cap.get(cv2.CAP_PROP_FPS)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
+    print("---------000000000000------------total_frames:"+str(total_frames))
     # Initialize the body keypoint tracker
     body_keypoint_track = BodyKeypointTrack(
         im_width=frame_width,
@@ -69,39 +69,45 @@ def main():
 
     frame_t = 0.0
     frame_i = 0
-    bar = tqdm(total=total_frames, desc='Running...')
+    print("---------1111111111111----0000--------total_frames:"+str(total_frames))
+    # bar = tqdm(total=total_frames, desc='Running...')
+    print("---------1111111111111------------")
     while cap.isOpened():
+        print("---------22222222222222------------")
         # Get the frame image
         ret, frame = cap.read()
         if not ret:
+            print("ret:" + str(ret))
             break
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
         # Get the body keypoints
         body_keypoint_track.track(frame, frame_t)
         kpts3d, valid = body_keypoint_track.get_smoothed_3d_keypoints(frame_t)
-
+        print("---------2222222---aa---------frame_t:"+str(frame_t))
         # Solve the skeleton IK
         skeleton_ik_solver.fit(torch.from_numpy(kpts3d).float(), torch.from_numpy(valid).bool(), frame_t)
-
+        print("---------2222222---bb---------")
         # Get the skeleton pose
         bone_euler = skeleton_ik_solver.get_smoothed_bone_euler(frame_t)
+        print("---------2222222---bb------11---")
         location = skeleton_ik_solver.get_smoothed_location(frame_t)
+        print("---------2222222---bb------22---")
         scale = skeleton_ik_solver.get_scale()
-
+        print("---------2222222---cc---------")
         bone_euler_sequence.append(bone_euler)
         location_sequence.append(location)
         scale_sequence.append(skeleton_ik_solver.get_scale())
-
+        print("---------2222222---dd---------")
         # Show keypoints tracking result
         show_annotation(frame, kpts3d, valid, body_keypoint_track.K)
         if cv2.waitKey(1) == 27:
             print('Cancelled by user. Exit.')
             exit()
-
+        print("---------2222222---ee---------")
         frame_i += 1
         frame_t += 1.0 / frame_rate
-        bar.update(1)
+        # bar.update(1)
 
     # Save animation result
     print("Save animation result...")
@@ -124,4 +130,7 @@ def main():
 
 
 if __name__ == '__main__':
+    print("begin ...")
     main()
+
+    # python mocap.py - -blend mixamo.blend - -video C:\\Users\\AYA\\Videos\\bowen - normal.mp4

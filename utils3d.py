@@ -94,12 +94,14 @@ def moving_least_square(x: torch.Tensor, y: torch.Tensor, w: torch.Tensor):
 def mls_smooth(input_t: List[float], input_y: List[np.ndarray], query_t: float, smooth_range: float):
     # 1-D MLS: input_t: (N), input_y: (..., N), query_t: scalar
     if len(input_y) == 1:
+        print("mls_smooth 0000000")
         return input_y[0]
     input_t = torch.tensor(input_t) - query_t
     input_y = torch.stack(input_y, axis=-1)
     broadcaster = (None,)*(len(input_y.shape) - 1)
     w = torch.maximum(smooth_range - torch.abs(input_t), torch.tensor(0))
     coef = moving_least_square(input_t[broadcaster], input_y, w[broadcaster])
+    print("mls_smooth coef")
     return coef[..., 0]
 
 def moving_least_square_numpy(x: np.ndarray, y: np.ndarray, w: np.ndarray):

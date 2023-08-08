@@ -179,10 +179,17 @@ class SkeletonIKSolver:
 
     def get_smoothed_bone_euler(self, query_t: float) -> torch.Tensor:
         input_euler, input_t = zip(*((e, t) for e, t in self.euler_angle_history if abs(t - query_t) < self.smooth_range))
+        # print("---------2222222---bb get_smoothed_bone_euler input_euler:"+str(input_euler)+" input_t:"+str(input_t))
         if len(input_t) <= 2:
+            print("--<=2 begin --")
             joints_smoothed = input_euler[-1]
+            print("--<=2 end --")
+            # print("---------2222222---ff11------input_euler:" + str(input_euler) + " input_t:" + str(input_t) + " joints_smoothed:"+joints_smoothed)
         else:
+            print("-->2 begin --")
             joints_smoothed = mls_smooth(input_t, input_euler, query_t, self.smooth_range)
+            print("-->2 begin --")
+            # print("---------2222222---ff22------input_euler:" + str(input_euler) + " input_t:" + str(input_t) + " joints_smoothed:" + joints_smoothed)
         return joints_smoothed
     
     def get_scale(self) -> float:
