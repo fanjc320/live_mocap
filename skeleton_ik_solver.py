@@ -130,7 +130,7 @@ class SkeletonIKSolver:
         # smoothness
         self.euler_angle_history, self.location_history = [], []
         self.align_scale = torch.tensor(0.0)
-
+    #拟合
     def fit(self, kpts: torch.Tensor, valid: torch.Tensor, frame_t: float):
         optimizer = torch.optim.LBFGS(
             [self.optim_bone_euler], 

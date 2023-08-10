@@ -133,4 +133,4 @@ if __name__ == '__main__':
     print("begin ...")
     main()
 
-    # python mocap.py - -blend mixamo.blend - -video C:\\Users\\AYA\\Videos\\bowen - normal.mp4
+    # python mocap.py --blend mixamo.blend --video C:\\Users\\AYA\\Videos\\bowen-normal.mp4

@@ -106,8 +106,12 @@ def mls_smooth(input_t: List[float], input_y: List[np.ndarray], query_t: float, 
 
 def moving_least_square_numpy(x: np.ndarray, y: np.ndarray, w: np.ndarray):
     # 1-D MLS: x: (..., N), y: (..., N), w: (..., N)
-    p = np.stack([np.ones_like(x), x], axis=-2)             # (..., 2, N)
-    M = p @ (w[..., :, None] * p.swapaxes(-2, -1))
+    p = np.stack([np.ones_like(x), x], axis=-2)
+    # M = p @ (w[..., :, None] * p.swapaxes(-2, -1))
+    w1 = w[..., :, None]  # (..., 2, N)
+    p1 = p.swapaxes(-2, -1)
+    wp = w1 * p1
+    M = p @ (wp)
     a = np.linalg.solve(M, (p @ (w * y)[..., :, None]))
     a = a.squeeze(-1)
     return a
@@ -121,4 +125,6 @@ def mls_smooth_numpy(input_t: List[float], input_y: List[np.ndarray], query_t: f
     broadcaster = (None,)*(len(input_y.shape) - 1)
     w = np.maximum(smooth_range - np.abs(input_t), 0)
     coef = moving_least_square_numpy(input_t[broadcaster], input_y, w[broadcaster])
-    return coef[..., 0]
+    # return coef[..., 0]
+    coef1 = coef[..., 0]
+    return coef1
