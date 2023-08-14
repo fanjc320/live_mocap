@@ -130,7 +130,7 @@ class SkeletonIKSolver:
         # smoothness
         self.euler_angle_history, self.location_history = [], []
         self.align_scale = torch.tensor(0.0)
-    #拟合
+    #ik解算
     def fit(self, kpts: torch.Tensor, valid: torch.Tensor, frame_t: float):
         optimizer = torch.optim.LBFGS(
             [self.optim_bone_euler], 
@@ -251,7 +251,7 @@ def test():
     for kpts3d, valid in tqdm.tqdm(body_keypoints):
         solver.fit(torch.from_numpy(kpts3d).float(), torch.from_numpy(valid).bool())
         bone_matrix_world_seq.append(solver.get_bone_matrix_world())
-        bone_eulers_seq.append(solver.get_bone_euler())
+        bone_eulers_seq.append(solver.get_bone_euler())# ????get_bone_euler没有定义?
         scale_seq.append(solver.get_scale())
         if start_t is None:
             start_t = time.time()

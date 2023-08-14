@@ -86,9 +86,27 @@ def intrinsic_from_fov(fov: float, width: int, height: int) -> np.ndarray:
 def moving_least_square(x: torch.Tensor, y: torch.Tensor, w: torch.Tensor):
     # 1-D MLS: x: (..., N), y: (..., N), w: (..., N)
     p = torch.stack([torch.ones_like(x), x], dim=-2)             # (..., 2, N)
+    print("moving_least_square 0000000000 x.shape:", x.shape, " x:",x)# x: tensor([[[-0.0690, -0.0345,  0.0000]]])
+    print("moving_least_square 0000000000 y.shape:", y.shape, " y:",y)
+    print("moving_least_square 0000000000 y.shape:", w.shape, " w:",w)
+
+    # p: tensor([[[[1.0000, 1.0000, 1.0000], [-0.0690, -0.0345, 0.0000]]]])
+    # M.shape: torch.Size([1, 1, 2, 2])
+    # M: tensor([[[[1.4483, -0.0476], [-0.0476, 0.0027]]]])
+    print("moving_least_square 1111 p.shape:", p.shape, " p:",p)
+
     M = p @ (w[..., :, None] * p.transpose(-2, -1))
+    print("moving_least_square 2222 M.shape:", M.shape, " M:",M) # M.shape: torch.Size([1, 1, 2, 2])
+    pwy = p @ (w * y)
+    print("moving_least_square 2222 aaaaaa pwy.shape:", pwy.shape, " pwy:", pwy) # torch.Size([1, 50, 2, 3])
+    pwyn = p @ (w * y)[..., :, None]
+    print("moving_least_square 2222 bbbbbb pwyn.shape:", pwyn.shape, " pwyn:", pwyn) # torch.Size([50, 3, 2, 1])
+
     a = torch.linalg.solve(M, (p @ (w * y)[..., :, None]))
+    print("moving_least_square 3333 a:",a)
     a = a.squeeze(-1)
+    print("moving_least_square 4444 a:",a)
+
     return a
 
 def mls_smooth(input_t: List[float], input_y: List[np.ndarray], query_t: float, smooth_range: float):
@@ -96,10 +114,16 @@ def mls_smooth(input_t: List[float], input_y: List[np.ndarray], query_t: float, 
     if len(input_y) == 1:
         print("mls_smooth 0000000")
         return input_y[0]
+
+    print("mls_smooth 111111")
     input_t = torch.tensor(input_t) - query_t
+    print("mls_smooth 222222 input_t:", input_t)
     input_y = torch.stack(input_y, axis=-1)
+    print("mls_smooth 333333 input_y:", input_y)
     broadcaster = (None,)*(len(input_y.shape) - 1)
+    print("mls_smooth 444444 broadcaster:", broadcaster)
     w = torch.maximum(smooth_range - torch.abs(input_t), torch.tensor(0))
+    print("mls_smooth 555555 w:",w)
     coef = moving_least_square(input_t[broadcaster], input_y, w[broadcaster])
     print("mls_smooth coef")
     return coef[..., 0]
@@ -109,11 +133,11 @@ def moving_least_square_numpy(x: np.ndarray, y: np.ndarray, w: np.ndarray):
     p = np.stack([np.ones_like(x), x], axis=-2)
     # M = p @ (w[..., :, None] * p.swapaxes(-2, -1))
     w1 = w[..., :, None]  # (..., 2, N)
-    p1 = p.swapaxes(-2, -1)
+    p1 = p.swapaxes(-2, -1) # swapaxes https://blog.csdn.net/qq_38103303/article/details/105345096
     wp = w1 * p1
     M = p @ (wp)
     a = np.linalg.solve(M, (p @ (w * y)[..., :, None]))
-    a = a.squeeze(-1)
+    a = a.squeeze(-1) # squeeze https://blog.csdn.net/zenghaitao0128/article/details/78512715
     return a
 
 def mls_smooth_numpy(input_t: List[float], input_y: List[np.ndarray], query_t: float, smooth_range: float):

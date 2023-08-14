@@ -15,9 +15,9 @@ def test1():
         row2 = np.array([b])
         A = np.vstack([A, row1])
         B = np.vstack([B, row2])
-        # print("a:", a, " b:", b,)
-        # print("row1:", row1)
-        # print("row2:", row2)
+        print("a:", a, " b:", b)
+        print("row1:", row1)
+        print("row2:", row2)
     print("A:", A)
     print("B:", B)
     # x′=(AT∗A)−1∗AT∗b https://www.cnblogs.com/zzk0/p/10468502.html
@@ -65,7 +65,9 @@ def test3():
                   [sumxx, sumxxx, sumxxxx]])
     B = np.array([sumf, sumxf, sumxxf])
     ans = np.linalg.solve(A, B)
-    print(ans)
+    print("A:",A)
+    print("B:",B)
+    print("ans:",ans)
     xx = np.arange(0, 1, 0.01)
     yy = ans[0] + ans[1] * xx + ans[2] * xx**2
     plt.plot(xx, yy)
@@ -112,4 +114,5 @@ def test4():
     plt.show()
 
 
-test4()
+# test4()
+test3()

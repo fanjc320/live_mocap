@@ -35,7 +35,8 @@ def main():
     print("Export skeleton...")
     if os.path.exists('tmp/skeleton'):
         shutil.rmtree('tmp/skeleton')
-    os.system(f"blender {args.blend} --background --python export_skeleton.py")
+    # os.system(f"blender {args.blend} --background --python export_skeleton.py")
+    os.system(f"blender mixamo.blend --background --python export_skeleton.py")
     if not os.path.exists('tmp/skeleton'):
         raise Exception("Skeleton export failed")
 
