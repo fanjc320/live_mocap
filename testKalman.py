@@ -48,6 +48,7 @@ def example():
 
     for i in range(itr):
         real_state.append(x[0])
+        print("x[0]:", x[0], " x:", x)
         x = f(x)
 
     measurements = [x - 1 + np.random.normal(0, 1) for x in real_state]
@@ -68,3 +69,5 @@ def example():
 
 if __name__ == '__main__':
     example()
+
+# 这里没有用estimate,直接predict

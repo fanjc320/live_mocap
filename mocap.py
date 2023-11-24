@@ -134,4 +134,6 @@ if __name__ == '__main__':
     print("begin ...")
     main()
 
+    #cmd.exe
+    #C:\Windows\System32 > conda activate live_mocap
     # python mocap.py --blend mixamo.blend --video C:\\Users\\AYA\\Videos\\bowen-normal.mp4

@@ -86,9 +86,13 @@ def intrinsic_from_fov(fov: float, width: int, height: int) -> np.ndarray:
 def moving_least_square(x: torch.Tensor, y: torch.Tensor, w: torch.Tensor):
     # 1-D MLS: x: (..., N), y: (..., N), w: (..., N)
     p = torch.stack([torch.ones_like(x), x], dim=-2)             # (..., 2, N)
-    print("moving_least_square 0000000000 x.shape:", x.shape, " x:",x)# x: tensor([[[-0.0690, -0.0345,  0.0000]]])
-    print("moving_least_square 0000000000 y.shape:", y.shape, " y:",y)
-    print("moving_least_square 0000000000 y.shape:", w.shape, " w:",w)
+    print("moving_least_square 0000000000 x.shape:", x.shape)#, " x:",x)# x: tensor([[[-0.0690, -0.0345,  0.0000]]])
+    print("moving_least_square 0000000000 y.shape:", y.shape)#, " y:",y)
+    print("moving_least_square 0000000000 w.shape:", w.shape)#, " w:",w)
+    # x.shape: torch.Size([1, 1, 3])
+    # y.shape: torch.Size([50, 3, 3])
+    # w.shape: torch.Size([1, 1, 3])
+    # p.shape: torch.Size([1, 1, 2, 3])
 
     # p: tensor([[[[1.0000, 1.0000, 1.0000], [-0.0690, -0.0345, 0.0000]]]])
     # M.shape: torch.Size([1, 1, 2, 2])
@@ -96,11 +100,14 @@ def moving_least_square(x: torch.Tensor, y: torch.Tensor, w: torch.Tensor):
     print("moving_least_square 1111 p.shape:", p.shape, " p:",p)
 
     M = p @ (w[..., :, None] * p.transpose(-2, -1))
-    print("moving_least_square 2222 M.shape:", M.shape, " M:",M) # M.shape: torch.Size([1, 1, 2, 2])
+    #print("moving_least_square 2222 M.shape:", M.shape, " M:",M) # M.shape: torch.Size([1, 1, 2, 2])
+    print("moving_least_square 2222 M.shape:", M.shape) # M.shape: torch.Size([1, 1, 2, 2])
     pwy = p @ (w * y)
-    print("moving_least_square 2222 aaaaaa pwy.shape:", pwy.shape, " pwy:", pwy) # torch.Size([1, 50, 2, 3])
+    #print("moving_least_square 2222 aaaaaa pwy.shape:", pwy.shape, " pwy:", pwy) # torch.Size([1, 50, 2, 3])
+    print("moving_least_square 2222 aaaaaa pwy.shape:", pwy.shape) # torch.Size([1, 50, 2, 3])
     pwyn = p @ (w * y)[..., :, None]
-    print("moving_least_square 2222 bbbbbb pwyn.shape:", pwyn.shape, " pwyn:", pwyn) # torch.Size([50, 3, 2, 1])
+    #print("moving_least_square 2222 bbbbbb pwyn.shape:", pwyn.shape, " pwyn:", pwyn) # torch.Size([50, 3, 2, 1])
+    print("moving_least_square 2222 bbbbbb pwyn.shape:", pwyn.shape) # torch.Size([50, 3, 2, 1])
 
     a = torch.linalg.solve(M, (p @ (w * y)[..., :, None]))
     print("moving_least_square 3333 a:",a)
