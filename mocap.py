@@ -53,7 +53,7 @@ def main():
     print("main aaaaaaaaaa...3333333")
     tmp = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     print("main aaaaaaaaaa...444444"+str(tmp))
-    # 这里会停止运行，出现这种原因是，视频中包含了损坏的或不能被opencv解码的帧，opencv就会跳过这些帧，因此造成通过属性（CAP_PROP_FRAME_COUNT）和实际读取的帧数不一样。所以，如果想要获取能够读取的帧数，首先遍历一遍视频。
+    # �����ֹͣ���У���������ԭ���ǣ���Ƶ�а������𻵵Ļ��ܱ�opencv�����֡��opencv�ͻ�������Щ֡��������ͨ�����ԣ�CAP_PROP_FRAME_COUNT����ʵ�ʶ�ȡ��֡����һ�������ԣ������Ҫ��ȡ�ܹ���ȡ��֡�������ȱ���һ����Ƶ��
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     print("main bbbbbbbbb..."+str(total_frames))
     # Initialize the body keypoint tracker
