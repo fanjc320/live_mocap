@@ -93,6 +93,7 @@ class SkeletonIKSolver:
   
         # Optimization target
         bone_subset, optimizable_bones, kpt_pairs_id, joint_pairs_id = get_optimization_target(all_bone_parents, skeleton_remap, track_hands)
+        # print("SkeletonIKSolver joint_pairs_id.shape:" + str(joint_pairs_id.shape))
         self.joint_pairs_a, self.joint_pairs_b = joint_pairs_id[:, 0], joint_pairs_id[:, 1]
         self.kpt_pairs_a, self.kpt_pairs_b = kpt_pairs_id[:, 0], kpt_pairs_id[:, 1]
         self.bone_parents_id = torch.tensor([(bone_subset.index(all_bone_parents[b]) if all_bone_parents[b] is not None else -1) for b in bone_subset], dtype=torch.long)

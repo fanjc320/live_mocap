@@ -47,7 +47,7 @@ for i in range(len(bone_euler_sequence)):
     # global location
     x, y, z = location_sequence[i].tolist()
     skeleton.location = x, z, -y
-    skeleton.keyframe_insert(data_path='location', frame=i)
+    skeleton.keyframe_insert(data_path='location', frame=i) #?????
 
 # # add keypoints animation
 # # create a sphere for each keypoint

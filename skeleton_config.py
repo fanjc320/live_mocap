@@ -226,7 +226,7 @@ def get_optimization_target(bone_parents: Dict[str, str], skeleton_remap: Dict[s
     else:
         kpt_pairs = [(a, b) for a, b in TARGET_KEYPOINT_PAIRS_WITHOUT_HANDS if a in skeleton_remap and b in skeleton_remap]
     joint_pairs = [(skeleton_remap[a], skeleton_remap[b]) for a, b in kpt_pairs]
-
+    print("get_optimization_target joint_pairs.shape:" + str(len(joint_pairs)))
     # Find bones that has target bones as children
     bone_subset = []
     for t in itertools.chain(*joint_pairs):
@@ -234,9 +234,12 @@ def get_optimization_target(bone_parents: Dict[str, str], skeleton_remap: Dict[s
         while bone_parents[t] is not None:
             t = bone_parents[t]
             bone_chain.append(t)
+            print("get_optimization_target t:"+str(t))
         for b in reversed(bone_chain):
+            print("get_optimization_target b:" + str(b))
             if b not in bone_subset:
                 bone_subset.append(b)
+                print("get_optimization_target bb:" + str(b))
                 
     if track_hand:
         kpt_pairs_id = torch.tensor([(MEDIAPIPE_KEYPOINTS_WITH_HANDS.index(a), MEDIAPIPE_KEYPOINTS_WITH_HANDS.index(b)) for a, b in kpt_pairs], dtype=torch.long)
