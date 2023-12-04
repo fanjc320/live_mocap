@@ -53,7 +53,7 @@ def main():
     print("main aaaaaaaaaa...3333333")
     tmp = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     print("main aaaaaaaaaa...444444"+str(tmp))
-    # ÕâÀï»áÍ£Ö¹ÔËĞĞ£¬³öÏÖÕâÖÖÔ­ÒòÊÇ£¬ÊÓÆµÖĞ°üº¬ÁËËğ»µµÄ»ò²»ÄÜ±»opencv½âÂëµÄÖ¡£¬opencv¾Í»áÌø¹ıÕâĞ©Ö¡£¬Òò´ËÔì³ÉÍ¨¹ıÊôĞÔ£¨CAP_PROP_FRAME_COUNT£©ºÍÊµ¼Ê¶ÁÈ¡µÄÖ¡Êı²»Ò»Ñù¡£ËùÒÔ£¬Èç¹ûÏëÒª»ñÈ¡ÄÜ¹»¶ÁÈ¡µÄÖ¡Êı£¬Ê×ÏÈ±éÀúÒ»±éÊÓÆµ¡£
+    # è¿™é‡Œä¼šåœæ­¢è¿è¡Œï¼Œå‡ºç°è¿™ç§åŸå› æ˜¯ï¼Œè§†é¢‘ä¸­åŒ…å«äº†æŸåçš„æˆ–ä¸èƒ½è¢«opencvè§£ç çš„å¸§ï¼Œopencvå°±ä¼šè·³è¿‡è¿™äº›å¸§ï¼Œå› æ­¤é€ æˆé€šè¿‡å±æ€§ï¼ˆCAP_PROP_FRAME_COUNTï¼‰å’Œå®é™…è¯»å–çš„å¸§æ•°ä¸ä¸€æ ·ã€‚æ‰€ä»¥ï¼Œå¦‚æœæƒ³è¦è·å–èƒ½å¤Ÿè¯»å–çš„å¸§æ•°ï¼Œé¦–å…ˆéå†ä¸€éè§†é¢‘ã€‚
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     print("main bbbbbbbbb..."+str(total_frames))
     # Initialize the body keypoint tracker
@@ -90,19 +90,19 @@ def main():
         if not ret:
             print("main read fail ret:"+str(ret))
             break
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #ndarray(960,540,3)
 
         # Get the body keypoints
         body_keypoint_track.track(frame, frame_t)
         kpts3d, valid = body_keypoint_track.get_smoothed_3d_keypoints(frame_t)
 
         # Solve the skeleton IK
-        skeleton_ik_solver.fit(torch.from_numpy(kpts3d).float(), torch.from_numpy(valid).bool(), frame_t)
+        skeleton_ik_solver.fit(torch.from_numpy(kpts3d).float(), torch.from_numpy(valid).bool(), frame_t)# fit((33,3),
 
         # Get the skeleton pose
-        bone_euler = skeleton_ik_solver.get_smoothed_bone_euler(frame_t)
-        location = skeleton_ik_solver.get_smoothed_location(frame_t)
-        scale = skeleton_ik_solver.get_scale()
+        bone_euler = skeleton_ik_solver.get_smoothed_bone_euler(frame_t) # Tensor(50,3)
+        location = skeleton_ik_solver.get_smoothed_location(frame_t) # Tensor(3,)
+        scale = skeleton_ik_solver.get_scale() # tensor(1.09)
 
         bone_euler_sequence.append(bone_euler)
         location_sequence.append(location)

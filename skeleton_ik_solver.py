@@ -83,7 +83,7 @@ class SkeletonIKSolver:
         # load skeleton model data
         all_bone_names, all_bone_parents, all_bone_matrix_world_rest, all_bone_matrix, skeleton_remap = load_skeleton_data(model_path)
         
-        self.keypoints = MEDIAPIPE_KEYPOINTS_WITH_HANDS if track_hands else MEDIAPIPE_KEYPOINTS_WITHOUT_HANDS
+        self.keypoints = MEDIAPIPE_KEYPOINTS_WITH_HANDS if track_hands else MEDIAPIPE_KEYPOINTS_WITHOUT_HANDS #[33]
 
         # skeleton structure info
         self.all_bone_names: List[str] = all_bone_names
@@ -92,26 +92,30 @@ class SkeletonIKSolver:
         self.all_bone_matrix: torch.Tensor = torch.from_numpy(all_bone_matrix).float()
   
         # Optimization target
+        #bone_subset:['pelvis', 'spine1', 'spine2', 'spine3', 'neck', 'head', 'left_ear', 'right_ear', 'left_collar', 'left_shoulder', 'left_hip', 'right_collar', 'right_shoulder', 'right_hip', 'left_elbow', 'left_wrist', 'right_elbow', 'right_wrist', 'left_knee', 'left_ankle', 'right_knee', 'right_ankle']
         bone_subset, optimizable_bones, kpt_pairs_id, joint_pairs_id = get_optimization_target(all_bone_parents, skeleton_remap, track_hands)
         # print("SkeletonIKSolver joint_pairs_id.shape:" + str(joint_pairs_id.shape))
-        self.joint_pairs_a, self.joint_pairs_b = joint_pairs_id[:, 0], joint_pairs_id[:, 1]
-        self.kpt_pairs_a, self.kpt_pairs_b = kpt_pairs_id[:, 0], kpt_pairs_id[:, 1]
-        self.bone_parents_id = torch.tensor([(bone_subset.index(all_bone_parents[b]) if all_bone_parents[b] is not None else -1) for b in bone_subset], dtype=torch.long)
-        subset_id = [all_bone_names.index(b) for b in bone_subset]
-        self.bone_matrix = self.all_bone_matrix[subset_id]
+        self.joint_pairs_a, self.joint_pairs_b = joint_pairs_id[:, 0], joint_pairs_id[:, 1] #
+        self.kpt_pairs_a, self.kpt_pairs_b = kpt_pairs_id[:, 0], kpt_pairs_id[:, 1] #tensor([ 7, 11, 12, 23, 11, 13, 15, 14, 16, 23, 25, 24, 26, 15, 16, 15]), tensor([ 8, 23, 24, 24, 12, 11, 13, 12, 14, 25, 27, 26, 28, 23, 24, 16])
+        #self.bone_parents_id tensor([-1, 0, 1, 2, 3, 4, 5, 5, 3, 8, 0, 3, 11, 0, 9, 14, 12, 16, 10, 18, 13, 20])
+        self.bone_parents_id = torch.tensor([(bone_subset.index(all_bone_parents[b]) if all_bone_parents[b] is not None else -1) for b in bone_subset], dtype=torch.long) #
+        #subset_id [0, 1, 2, 3, 4, 5, 8, 7, 33, 34, 62, 9, 10, 57, 35, 36, 11, 12, 63, 64, 58, 59] #len:22
+        subset_id = [all_bone_names.index(b) for b in bone_subset] # len:67
+        self.bone_matrix = self.all_bone_matrix[subset_id] # shape:22,4,4 = shape:67,4,4
 
         # joint constraints
+        #tensor(49), tensor(49,3,2)
         joint_constraint_id, joint_constraint_value = get_constraints(all_bone_names, all_bone_matrix_world_rest, optimizable_bones, skeleton_remap)
         self.joint_contraint_id = joint_constraint_id
         self.joint_constraints_min, self.joint_constraints_max = joint_constraint_value[:, :, 0], joint_constraint_value[:, :, 1]
 
         # align location
-        self.align_location_kpts, self.align_location_bones = get_align_location(optimizable_bones, skeleton_remap)
+        self.align_location_kpts, self.align_location_bones = get_align_location(optimizable_bones, skeleton_remap) #tesor([11,12]) tensor([4,5]) = (len:50)
 
         # align scale
-        self.align_scale_pairs_kpt, self.align_scale_pairs_bone = get_align_scale(all_bone_names, skeleton_remap)
-        rest_joints = torch.from_numpy(all_bone_matrix_world_rest)[:, :3, 3]
-        self.align_scale_pairs_length = torch.norm(rest_joints[self.align_scale_pairs_bone[:, 0]] - rest_joints[self.align_scale_pairs_bone[:, 1]], dim=-1)
+        self.align_scale_pairs_kpt, self.align_scale_pairs_bone = get_align_scale(all_bone_names, skeleton_remap) # tensor(4,2), tensor(4,2) = (67,)
+        rest_joints = torch.from_numpy(all_bone_matrix_world_rest)[:, :3, 3] # tensor(67,3)
+        self.align_scale_pairs_length = torch.norm(rest_joints[self.align_scale_pairs_bone[:, 0]] - rest_joints[self.align_scale_pairs_bone[:, 1]], dim=-1) # tensor(4,)
         
         # optimization hyperparameters
         self.lr = kwargs.get('lr', 1.0)
@@ -123,15 +127,15 @@ class SkeletonIKSolver:
         self.smooth_range = kwargs.get('smooth_range', 0.3)
 
         # optimizable bone euler angles
-        self.optimizable_bones = optimizable_bones
-        self.gather_id = torch.tensor([(optimizable_bones.index(b) + 1 if b in optimizable_bones else 0) for b in bone_subset], dtype=torch.long)[:, None, None].repeat(1, 4, 4)
+        self.optimizable_bones = optimizable_bones # list:50
+        self.gather_id = torch.tensor([(optimizable_bones.index(b) + 1 if b in optimizable_bones else 0) for b in bone_subset], dtype=torch.long)[:, None, None].repeat(1, 4, 4) # tensor(22,4,4)
         self.all_gather_id = torch.tensor([(optimizable_bones.index(b) + 1 if b in optimizable_bones else 0) for b in all_bone_names], dtype=torch.long)[:, None, None].repeat(1, 4, 4)
         self.optim_bone_euler = torch.zeros((len(optimizable_bones), 3), requires_grad=True)
 
         # smoothness
         self.euler_angle_history, self.location_history = [], []
         self.align_scale = torch.tensor(0.0)
-    #ik解算
+
     def fit(self, kpts: torch.Tensor, valid: torch.Tensor, frame_t: float):
         optimizer = torch.optim.LBFGS(
             [self.optim_bone_euler], 
@@ -180,17 +184,10 @@ class SkeletonIKSolver:
 
     def get_smoothed_bone_euler(self, query_t: float) -> torch.Tensor:
         input_euler, input_t = zip(*((e, t) for e, t in self.euler_angle_history if abs(t - query_t) < self.smooth_range))
-        # print("---------2222222---bb get_smoothed_bone_euler input_euler:"+str(input_euler)+" input_t:"+str(input_t))
         if len(input_t) <= 2:
-            print("--<=2 begin --")
             joints_smoothed = input_euler[-1]
-            print("--<=2 end --")
-            # print("---------2222222---ff11------input_euler:" + str(input_euler) + " input_t:" + str(input_t) + " joints_smoothed:"+joints_smoothed)
         else:
-            print("-->2 begin --")
             joints_smoothed = mls_smooth(input_t, input_euler, query_t, self.smooth_range)
-            print("-->2 begin --")
-            # print("---------2222222---ff22------input_euler:" + str(input_euler) + " input_t:" + str(input_t) + " joints_smoothed:" + joints_smoothed)
         return joints_smoothed
     
     def get_scale(self) -> float:
@@ -252,7 +249,7 @@ def test():
     for kpts3d, valid in tqdm.tqdm(body_keypoints):
         solver.fit(torch.from_numpy(kpts3d).float(), torch.from_numpy(valid).bool())
         bone_matrix_world_seq.append(solver.get_bone_matrix_world())
-        bone_eulers_seq.append(solver.get_bone_euler())# ????get_bone_euler没有定义?
+        bone_eulers_seq.append(solver.get_bone_euler())
         scale_seq.append(solver.get_scale())
         if start_t is None:
             start_t = time.time()

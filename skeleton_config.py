@@ -224,7 +224,7 @@ def get_optimization_target(bone_parents: Dict[str, str], skeleton_remap: Dict[s
     if track_hand:
         kpt_pairs = [(a, b) for a, b in TARGET_KEYPOINT_PAIRS_WITH_HANDS if a in skeleton_remap and b in skeleton_remap]
     else:
-        kpt_pairs = [(a, b) for a, b in TARGET_KEYPOINT_PAIRS_WITHOUT_HANDS if a in skeleton_remap and b in skeleton_remap]
+        kpt_pairs = [(a, b) for a, b in TARGET_KEYPOINT_PAIRS_WITHOUT_HANDS if a in skeleton_remap and b in skeleton_remap]#[16]
     joint_pairs = [(skeleton_remap[a], skeleton_remap[b]) for a, b in kpt_pairs]
     print("get_optimization_target joint_pairs.shape:" + str(len(joint_pairs)))
     # Find bones that has target bones as children
@@ -276,9 +276,9 @@ def get_constraints(bone_names: List[str], bone_matrix_world_rest: np.ndarray, o
     
     return joint_constraints_id, torch.deg2rad(joint_constraints)
 
-def get_align_location(bone_names: List[str], skeleton_remap: Dict[str, str]):
-    align_location_kpts = torch.tensor([MEDIAPIPE_KEYPOINTS_WITHOUT_HANDS.index(k) for k in ALIGN_LOCATION_WITH], dtype=torch.long)
-    align_location_joints = torch.tensor([bone_names.index(skeleton_remap[k]) for k in ALIGN_LOCATION_WITH], dtype=torch.long)
+def get_align_location(bone_names: List[str], skeleton_remap: Dict[str, str]): #(len:50,)
+    align_location_kpts = torch.tensor([MEDIAPIPE_KEYPOINTS_WITHOUT_HANDS.index(k) for k in ALIGN_LOCATION_WITH], dtype=torch.long) # tensor([11,12])
+    align_location_joints = torch.tensor([bone_names.index(skeleton_remap[k]) for k in ALIGN_LOCATION_WITH], dtype=torch.long) # tensor([4,5])
     return align_location_kpts, align_location_joints
 
 def get_align_scale(bone_names: List[str], skeleton_remap: Dict[str, str]):

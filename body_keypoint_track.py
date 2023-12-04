@@ -87,16 +87,17 @@ class BodyKeypointTrack:
 
     def _get_camera_space_landmarks(self, image_landmarks, world_landmarks, visible, rvec, tvec):
         # get transformation matrix from world coordinate to camera coordinate
-        _, rvec, tvec = cv2.solvePnP(world_landmarks[visible], image_landmarks[visible], self.K, np.zeros(5), rvec=rvec, tvec=tvec, useExtrinsicGuess=rvec is not None)
-        rmat, _ = cv2.Rodrigues(rvec)
+        _, rvec, tvec = cv2.solvePnP(world_landmarks[visible], image_landmarks[visible], self.K, np.zeros(5), rvec=rvec, tvec=tvec, useExtrinsicGuess=rvec is not None) # _,(3,1),(3,1)
+        rmat, _ = cv2.Rodrigues(rvec) # ndarray(3,3)
         
         # get camera coordinate of all keypoints
-        kpts3d_cam = world_landmarks @ rmat.T + tvec.T
+        kpts3d_cam = world_landmarks @ rmat.T + tvec.T # ndarray(33,3) @ ndarray(3,3) + ndarray(3,3)
 
         # force projected x, y to be identical to visibile image_landmarks
-        kpts3d_cam_z = kpts3d_cam[:, 2].reshape(-1, 1)
+        kpts3d_cam_z = kpts3d_cam[:, 2].reshape(-1, 1) # ndarray(33,1) = ndarray(33,3) reshape可能不需要
+
         kpts3d_cam[:, :2] =  (np.concatenate([image_landmarks, np.ones((image_landmarks.shape[0], 1))], axis=1) @ np.linalg.inv(self.K).T * kpts3d_cam_z)[:, :2]
-        return kpts3d_cam, rvec, tvec
+        return kpts3d_cam, rvec, tvec #ndarray(33,3), ndarray(3,1), ndarray(3,1)
 
     def _track_pose(self, image: np.ndarray, t: float):
         self.pose_kpts2d = self.pose_kpts3d = self.barycenter = None
@@ -116,9 +117,9 @@ class BodyKeypointTrack:
         if tvec[2] < 0:
             return
 
-        self.pose_kpts2d = image_landmarks
-        self.barycenter = np.average(kpts3d, axis=0, weights=self.barycenter_weight)
-        self.pose_kpts3d = kpts3d - self.barycenter
+        self.pose_kpts2d = image_landmarks # ndarray(33,2)
+        self.barycenter = np.average(kpts3d, axis=0, weights=self.barycenter_weight) # (3,) 0.05064,-0.05717,2.07089
+        self.pose_kpts3d = kpts3d - self.barycenter # ndarray(33,3)
         self.pose_rvec, self.pose_tvec = rvec, tvec
         self.barycenter_history.append((self.barycenter, t))
         self.pose_history.append((kpts3d, t))
@@ -229,8 +230,8 @@ class BodyKeypointTrack:
 
 def show_annotation(image, kpts3d, valid, intrinsic):
     annotate_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    kpts3d_homo = kpts3d @ intrinsic.T
-    kpts2d = kpts3d_homo[:, :2] / kpts3d_homo[:, 2:]
+    kpts3d_homo = kpts3d @ intrinsic.T # ndarray(33,3)
+    kpts2d = kpts3d_homo[:, :2] / kpts3d_homo[:, 2:] # ndarray(33,2)
     for a, b in MEDIAPIPE_POSE_CONNECTIONS:
         if valid[a] == 0 or valid[b] == 0:
             continue
@@ -244,10 +245,8 @@ def show_annotation(image, kpts3d, valid, intrinsic):
 def test():
     import tqdm
 
-    # INPUT_FILE = 'C:\\Users\\16215\\Pictures\\视频项目\\orange.mp4'
-    INPUT_FILE = 'C:\\Users\\AYA\\Videos\\bowen-normal.mp4'
-    # INPUT_IMAGE_SIZE = (640, 360)
-    INPUT_IMAGE_SIZE = (540, 960)
+    INPUT_FILE = 'C:\\Users\\16215\\Pictures\\视频项目\\orange.mp4'
+    INPUT_IMAGE_SIZE = (640, 360)
     cap = cv2.VideoCapture(INPUT_FILE)
     kpts3ds = []
     
@@ -257,8 +256,7 @@ def test():
         track_hands=False, 
         smooth_range=0.3, 
         smooth_range_barycenter=1.0, 
-        # frame_delta=1.0 / 30.0
-        frame_rate=1.0 / 30.0
+        frame_delta=1.0 / 30.0
     )
 
     frame_t = 0.0
