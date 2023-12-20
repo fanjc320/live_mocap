@@ -43,6 +43,7 @@ for i in range(len(bone_euler_sequence)):
         bone.rotation_mode = 'YXZ'
         bone.rotation_euler = bone_euler_sequence[i][j].tolist()
         bone.keyframe_insert(data_path='rotation_euler', frame=i)
+        print("bone.keyframe_insert");
     
     # global location
     x, y, z = location_sequence[i].tolist()

@@ -7,7 +7,7 @@ SAVE_DIR = "tmp\\skeleton"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 def iterdfs(bone):
-    yield bone
+    yield bone #?????
     for child in bone.children:
         for descent in iterdfs(child):
             yield descent
@@ -25,13 +25,13 @@ def export_bones(skeleton):
     bone_matrix_rel, bone_matrix_world = [], []
     for bn in bone_names:
         b = bones[bn]
-        bone_matrix_world.append(np.array(skeleton.matrix_world @ b.matrix, dtype=np.float32))
+        bone_matrix_world.append(np.array(skeleton.matrix_world @ b.matrix, dtype=np.float32)) #????
         if b.parent is None:
-            m = np.array(skeleton.matrix_world @ b.matrix @ b.matrix_basis.inverted(), dtype=np.float32)
+            m = np.array(skeleton.matrix_world @ b.matrix @ b.matrix_basis.inverted(), dtype=np.float32) #?????
         else:
             m = np.array(b.parent.matrix.inverted() @ b.matrix @ b.matrix_basis.inverted(), dtype=np.float32)
         bone_matrix_rel.append(m)
-    return bone_names, bone_parents, np.stack(bone_matrix_rel), np.stack(bone_matrix_world)
+    return bone_names, bone_parents, np.stack(bone_matrix_rel), np.stack(bone_matrix_world) #?????
 
 def export_numpy(info: dict, prefix = []):
     for k in info:

@@ -14,10 +14,23 @@ import numpy as np
 import cv2
 import torch
 from tqdm import tqdm
+import cProfile
+import pstats
 
 from body_keypoint_track import BodyKeypointTrack, show_annotation
 from skeleton_ik_solver import SkeletonIKSolver
 
+print("begin>>>>>>>>>>>")
+import sys
+# ['D:\\projs_rm\\mediapipe\\live_mocap', 'D:\\projs_rm\\mediapipe\\live_mocap', 'D:\\projs_rm\\mediapipe\\live_mocap', 'C:\\Program Files\\JetBrains\\PyCharm 2022.3.2\\plugins\\python\\helpers\\pycharm_display', 'C:\\Users\\AYA\\.conda\\envs\\live_mocap_310\\python310.zip', 'C:\\Users\\AYA\\.conda\\envs\\live_mocap_310\\DLLs', 'C:\\Users\\AYA\\.conda\\envs\\live_mocap_310\\lib', 'C:\\Users\\AYA\\.conda\\envs\\live_mocap_310', 'C:\\Users\\AYA\\AppData\\Roaming\\Python\\Python310\\site-packages', 'C:\\Users\\AYA\\.conda\\envs\\live_mocap_310\\lib\\site-packages', 'C:\\Program Files\\JetBrains\\PyCharm 2022.3.2\\plugins\\python\\helpers\\pycharm_matplotlib_backend']
+# ---------------
+# C:\Users\AYA\.conda\envs\live_mocap_310\python.exe
+sys.path.clear()
+# print(sys.path)
+print("---------------")
+
+print(sys.executable)
+print("end<<<<<<<<<<")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -30,13 +43,13 @@ def main():
     FOV = np.pi / 3
 
     # Call blender to export skeleton
-    os.makedirs('tmp', exist_ok=True)
-    print("Export skeleton...")
-    if os.path.exists('tmp/skeleton'):
-        shutil.rmtree('tmp/skeleton')
-    os.system(f"blender {args.blend} --background --python export_skeleton.py")
-    if not os.path.exists('tmp/skeleton'):
-        raise Exception("Skeleton export failed")
+    # os.makedirs('tmp', exist_ok=True)
+    # print("Export skeleton...")
+    # if os.path.exists('tmp/skeleton'):
+    #     shutil.rmtree('tmp/skeleton')
+    # os.system(f"blender {args.blend} --background --python export_skeleton.py")
+    # if not os.path.exists('tmp/skeleton'):
+    #     raise Exception("Skeleton export failed")
 
     print("main aaaaaaaaaa...")
 

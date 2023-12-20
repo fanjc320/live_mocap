@@ -102,13 +102,70 @@ def mls_smooth(input_t: List[float], input_y: List[np.ndarray], query_t: float, 
     coef = moving_least_square(input_t[broadcaster], input_y, w[broadcaster])
     return coef[..., 0]
 
-def moving_least_square_numpy(x: np.ndarray, y: np.ndarray, w: np.ndarray):
+# def moving_least_square_numpy(x: np.ndarray, y: np.ndarray, w: np.ndarray):
+def moving_least_square_numpy_old(x: np.ndarray, y: np.ndarray, w: np.ndarray):
     # 1-D MLS: x: (..., N), y: (..., N), w: (..., N)
     p = np.stack([np.ones_like(x), x], axis=-2)             # (..., 2, N)
     M = p @ (w[..., :, None] * p.swapaxes(-2, -1))
     a = np.linalg.solve(M, (p @ (w * y)[..., :, None]))
     a = a.squeeze(-1)
     return a
+# def moving_least_square_numpy_fjc(x: np.ndarray, y: np.ndarray, w: np.ndarray):
+def moving_least_square_numpy(x: np.ndarray, y: np.ndarray, w: np.ndarray):
+    # 1-D MLS: x: (..., N), y: (..., N), w: (..., N)
+    tmp1 = np.ones_like(x)
+    p = np.stack([tmp1, x], axis=-2)
+    left1 = w[..., :, None]
+    pswap = p.swapaxes(-2, -1)
+    le_mult_ps = left1 * pswap
+    M = p @ le_mult_ps # ??????
+    wy = w * y
+    wyNone = (wy)[..., :, None]
+    pwyNone = p @ wyNone
+    print("moving_least_square_numpy >>>>>>>>>>>>>>>>>>>>")
+    printNdArray("x", x)
+    printNdArray("y", y)
+    printNdArray("w", w)
+    printNdArray("tmp1", tmp1)
+    printNdArray("p", p)
+    printNdArray("left1", left1)
+    printNdArray("pswap", pswap)
+    printNdArray("le_mult_ps", le_mult_ps)
+    printNdArray("M", M)
+    printNdArray("wy", wy)
+    printNdArray("wyNone", wyNone)
+    printNdArray("pwyNone", pwyNone)
+    # print("x:", x)
+    # print("y:", y)
+    # print("w:", w)
+    # print("tmp1:", tmp1)
+    # print("p:", p)
+    # print("left1:", left1)
+    # print("pswap:", pswap)
+    # print("le_mult_ps:", le_mult_ps)
+    # print("M:", M)
+    # print("wy:", wy)
+    # print("wyNone:", wyNone)
+    # print("pwyNone:", pwyNone)
+    a = np.linalg.solve(M, pwyNone) #https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html
+    # print("a:", a)
+    b = a.squeeze(-1)
+    # print("b:", b)
+    return b
+
+# NumPy array to a string in Python [6 Methods]
+# Python 获取变量的名称作为字符串
+def get_variable_name(variable):
+    for name, value in locals().items():
+        if value is variable:
+            return name
+    return None
+def printNdArray(name, arr, bPrint = True):
+    # name = get_variable_name(arr)
+    dct = [{"name" : name}, {"shape" : arr.shape}, {"size" : arr.size}, {" arr" : arr}]
+    if bPrint:
+        print(dct)
+    return str
 
 def mls_smooth_numpy(input_t: List[float], input_y: List[np.ndarray], query_t: float, smooth_range: float):
     # 1-D MLS: input_t: (N), input_y: (..., N), query_t: scalar
